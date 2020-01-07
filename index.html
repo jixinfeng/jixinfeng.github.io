@@ -240,6 +240,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/30/Discrete-Optimization-Note-6-VRP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jx.f">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="东罗谷乡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/09/30/Discrete-Optimization-Note-6-VRP/" class="post-title-link" itemprop="url">Discrete Optimization 学习笔记 (6) 车辆路径问题</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-30 00:43:29" itemprop="dateCreated datePublished" datetime="2018-09-30T00:43:29-04:00">2018-09-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-07 00:00:32" itemprop="dateModified" datetime="2020-01-07T00:00:32-05:00">2020-01-07</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>车辆路径问题同样是一个和实际生活非常接近的问题。问题设定中包含 $M$ 个客户，每个客户有需求 $d_i$ 和所在的位置 $(x, y)$ 。位于起点的仓库可以派出 $N$ 辆送货车，每辆车有最大送货容量 $C$ ，车辆基础成本为 $S$，从 a 点开车到 b 点的成本和距离成正比。车辆要覆盖所有客户的需求，不重不漏，并且优化目标为求最少送货成本、需要的送货车辆数量 $N$，以及每辆车的路径。</p>
+<h2 id="局部搜索"><a href="#局部搜索" class="headerlink" title="局部搜索"></a>局部搜索</h2><p>由于车辆路径问题变量太多，总车辆数、每辆车负责的客户以及客户的顺序均可以调整，因此即时通过构建整数规划的标准形式并通过工具包求解，效率也不会太高。为了完成作业，这里我们只采用局部搜索的方式解决问题。</p>
+<p>局部搜索的资料有很多，<a href="https://www.researchgate.net/publication/318284891_A_PATH-EXCHANGE-TYPE_LOCAL_SEARCH_ALGORITHM_FOR_VEHICLE_ROUTING_AND_ITS_EFFICIENT_SEARCH_STRATEGY" target="_blank" rel="noopener" title="VRP Paper">这一篇文章</a>和我们要解决的问题非常吻合，因此我们尝试复现文章中设计的搜索方法求解问题。</p>
+<p>为了避免歧义，我们先定义一些术语：</p>
+<ul>
+<li>一辆车从客户 a 直接行驶到客户 b 时，我们称这辆车驶过了一条“边” （ edge ）</li>
+<li>一辆车连续驶过多个客户，即驶过多条首尾相连的边时，我们称这辆车驶过了一段“路径” （ path ）</li>
+<li>一辆车从起点出发，途径所有分配给它的客户，最终回到起点时，我们称这辆车驶过了一条“回路” ( route )</li>
+</ul>
+<p>有了这些术语，我们就可以定义四种基本的局部搜索模式了。</p>
+<h3 id="路径平移-Shift"><a href="#路径平移-Shift" class="headerlink" title="路径平移 Shift"></a>路径平移 Shift</h3><p><img src="/images/vrp-shift.png" alt="VRP 路径平移" title="TSP 2-opt 优化思路"></p>
+<p>路径平移，就是将一条回路中的部分路径移动到另一条回路中的某个位置，可以正接也可以反接。如果在不违反限制条件的情况下，可以讲一整条回路平移到另一回路中，那也就相当于合并了两条回路，减少了一辆车的需求。</p>
+<h3 id="路径交换-Interchange"><a href="#路径交换-Interchange" class="headerlink" title="路径交换 Interchange"></a>路径交换 Interchange</h3><p><img src="/images/vrp-interchange.png" alt="VRP 路径交换" title="TSP 2-opt 优化思路"></p>
+<p>路径交换，与平移类似，就是交换两个回路中各自的两端路径，由于两路径均可以在交换之后正接反接，因此一次交换可以产生四种可能的结果。</p>
+<h3 id="回路内换边-2-exchange"><a href="#回路内换边-2-exchange" class="headerlink" title="回路内换边 2-exchange"></a>回路内换边 2-exchange</h3><p><img src="/images/vrp-exchange.png" alt="VRP 回路内换边" title="TSP 2-opt 优化思路"></p>
+<p>回路内换边，和 TSP 的 2-opt 操作相同，即重新连接一条回路内两条边，进行一个“拧麻花”的操作。</p>
+<h3 id="回路间首尾重组-Ladder"><a href="#回路间首尾重组-Ladder" class="headerlink" title="回路间首尾重组 Ladder"></a>回路间首尾重组 Ladder</h3><p><img src="/images/vrp-ladder.png" alt="VRP 回路间首尾重组" title="TSP 2-opt 优化思路"></p>
+<p>回路间首尾重组，就是在两条回路中各自设置一个断点，将两条回路断点两侧的路径重新连接形成两条新回路。根据首尾连接的方式不同，可以产生两种结果。</p>
+<h3 id="搜索初始解"><a href="#搜索初始解" class="headerlink" title="搜索初始解"></a>搜索初始解</h3><p>局部搜索在操作过程中，只能在有效解间进行搜索并优化目标函数，因此需要找到一个效果不是很好但是可行的解作为搜索的起点。由于车辆路径问题变量多、关联性强、限制条件多，因此很难直接得到一组可行解。在这里我们采用贪心法得到第一组可行解并开始搜索。</p>
+<p>搜索的过程是：每当还有顾客没有覆盖到但当前没有车辆有足够容量时，增加一辆货车，从目前没有被覆盖的需求最小的客户开始送货，直至容量不足。如此操作直至所有客户都被覆盖。这样可以保证每个客户覆盖不重不漏，并且车辆容量都足够。</p>
+<p>找到初始解之后，就可以开始进行局部搜索，直至达到最大搜索时间、最大搜索次数或者无法通过局部搜索找到更优解为止。求解代码在<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-07-vrp/" target="_blank" rel="noopener" title="VRP Solution">这里</a>。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/19/Discrete-Optimization-Note-4-TSP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -888,74 +973,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2017/12/14/Leetcode-027-Remove-Element/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="jx.f">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="东罗谷乡">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2017/12/14/Leetcode-027-Remove-Element/" class="post-title-link" itemprop="url">Leetcode 027 Remove Element</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2017-12-14 15:11:57" itemprop="dateCreated datePublished" datetime="2017-12-14T15:11:57-05:00">2017-12-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="题目要求："><a href="#题目要求：" class="headerlink" title="题目要求："></a><a href="https://leetcode.com/problems/remove-element/description/" target="_blank" rel="noopener" title="Remove Element">题目要求</a>：</h2><p>输入数组和一个目标数字，要求从数组中原位去掉全部目标数字，并返回新数组长度，不要使用额外的存储空间。</p>
-<h2 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h2><p>与 <a href="/2017/12/10/Leetcode-026-Remove-Duplicates-from-Sorted-Array/" title="Leetcode 026 Remove Duplicates from Sorted Array">Leetcode 026 Remove Duplicates from Sorted Array</a> 思路一致。采用快慢指针，快指针遍历数组，慢指针从零开始，遇到非目标数字时将快指针的数值复制到慢指针处，慢指针前进一位。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">removeElement</span><span class="params">(self, nums, val)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :type val: int</span></span><br><span class="line"><span class="string">        :rtype: int</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> nums <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> nums == []:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">if</span> val <span class="keyword">not</span> <span class="keyword">in</span> nums:</span><br><span class="line">            <span class="keyword">return</span> len(nums)</span><br><span class="line">        slow, fast = <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> fast, fast_val <span class="keyword">in</span> enumerate(nums):</span><br><span class="line">            <span class="keyword">if</span> fast_val == val:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                nums[slow] = nums[fast]</span><br><span class="line">                slow += <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> slow</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1026,7 +1043,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-count">40</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1037,7 +1054,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

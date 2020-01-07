@@ -46,24 +46,26 @@
   };
 </script>
 
-  <meta name="description" content="问题描述旅行商问题，又称旅行推销员问题，简称 TSP ，在很多科普读物、流行文化中都出现过这一问题问题的影子。旅行商问题的基本内容非常简单：一位推销员要去一些城市推销商品，已知城市的位置和两两之间的距离，希望能寻找到一条能便利所有城市，并且每个城市只去一次，最后回到出发城市的路径，以节约时间和旅行成本。 即使不经过任何转化，原始形式的旅行商问题就可以直接应用在路径规划、后勤学、芯片电路设计等场景中">
+  <meta name="description" content="问题描述车辆路径问题同样是一个和实际生活非常接近的问题。问题设定中包含 $M$ 个客户，每个客户有需求 $d_i$ 和所在的位置 $(x, y)$ 。位于起点的仓库可以派出 $N$ 辆送货车，每辆车有最大送货容量 $C$ ，车辆基础成本为 $S$，从 a 点开车到 b 点的成本和距离成正比。车辆要覆盖所有客户的需求，不重不漏，并且优化目标为求最少送货成本、需要的送货车辆数量 $N$，以及每辆车的路">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Discrete Optimization 学习笔记 (4) 旅行商问题">
-<meta property="og:url" content="http://jixinfeng.github.io/2018/09/19/Discrete-Optimization-Note-4-TSP/index.html">
+<meta property="og:title" content="Discrete Optimization 学习笔记 (6) 车辆路径问题">
+<meta property="og:url" content="http://jixinfeng.github.io/2018/09/30/Discrete-Optimization-Note-6-VRP/index.html">
 <meta property="og:site_name" content="东罗谷乡">
-<meta property="og:description" content="问题描述旅行商问题，又称旅行推销员问题，简称 TSP ，在很多科普读物、流行文化中都出现过这一问题问题的影子。旅行商问题的基本内容非常简单：一位推销员要去一些城市推销商品，已知城市的位置和两两之间的距离，希望能寻找到一条能便利所有城市，并且每个城市只去一次，最后回到出发城市的路径，以节约时间和旅行成本。 即使不经过任何转化，原始形式的旅行商问题就可以直接应用在路径规划、后勤学、芯片电路设计等场景中">
-<meta property="og:image" content="http://jixinfeng.github.io/images/tsp-2-opt_wiki.png">
-<meta property="article:published_time" content="2018-09-19T22:40:09.000Z">
-<meta property="article:modified_time" content="2020-01-07T04:37:08.139Z">
+<meta property="og:description" content="问题描述车辆路径问题同样是一个和实际生活非常接近的问题。问题设定中包含 $M$ 个客户，每个客户有需求 $d_i$ 和所在的位置 $(x, y)$ 。位于起点的仓库可以派出 $N$ 辆送货车，每辆车有最大送货容量 $C$ ，车辆基础成本为 $S$，从 a 点开车到 b 点的成本和距离成正比。车辆要覆盖所有客户的需求，不重不漏，并且优化目标为求最少送货成本、需要的送货车辆数量 $N$，以及每辆车的路">
+<meta property="og:image" content="http://jixinfeng.github.io/images/vrp-shift.png">
+<meta property="og:image" content="http://jixinfeng.github.io/images/vrp-interchange.png">
+<meta property="og:image" content="http://jixinfeng.github.io/images/vrp-exchange.png">
+<meta property="og:image" content="http://jixinfeng.github.io/images/vrp-ladder.png">
+<meta property="article:published_time" content="2018-09-30T04:43:29.000Z">
+<meta property="article:modified_time" content="2020-01-07T05:00:32.910Z">
 <meta property="article:author" content="jx.f">
 <meta property="article:tag" content="optimization">
 <meta property="article:tag" content="coursera">
-<meta property="article:tag" content="greedy">
-<meta property="article:tag" content="tsp">
+<meta property="article:tag" content="heuristic">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://jixinfeng.github.io/images/tsp-2-opt_wiki.png">
+<meta name="twitter:image" content="http://jixinfeng.github.io/images/vrp-shift.png">
 
-<link rel="canonical" href="http://jixinfeng.github.io/2018/09/19/Discrete-Optimization-Note-4-TSP/">
+<link rel="canonical" href="http://jixinfeng.github.io/2018/09/30/Discrete-Optimization-Note-6-VRP/">
 
 
 <script id="page-configurations">
@@ -75,7 +77,7 @@
   };
 </script>
 
-  <title>Discrete Optimization 学习笔记 (4) 旅行商问题 | 东罗谷乡</title>
+  <title>Discrete Optimization 学习笔记 (6) 车辆路径问题 | 东罗谷乡</title>
   
 
 
@@ -184,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/19/Discrete-Optimization-Note-4-TSP/">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/30/Discrete-Optimization-Note-6-VRP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -197,7 +199,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Discrete Optimization 学习笔记 (4) 旅行商问题
+          Discrete Optimization 学习笔记 (6) 车辆路径问题
         </h1>
 
         <div class="post-meta">
@@ -207,14 +209,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2018-09-19 18:40:09" itemprop="dateCreated datePublished" datetime="2018-09-19T18:40:09-04:00">2018-09-19</time>
+              <time title="Created: 2018-09-30 00:43:29" itemprop="dateCreated datePublished" datetime="2018-09-30T00:43:29-04:00">2018-09-30</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
+                <time title="Modified: 2020-01-07 00:00:32" itemprop="dateModified" datetime="2020-01-07T00:00:32-05:00">2020-01-07</time>
               </span>
 
           
@@ -228,12 +230,27 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p><a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem" target="_blank" rel="noopener" title="TSP Wikipedia Page">旅行商问题</a>，又称旅行推销员问题，简称 TSP ，在很多<a href="https://www.amazon.com/Pursuit-Traveling-Salesman-Mathematics-Computation/dp/0691152705" target="_blank" rel="noopener" title="TSP Book">科普读物</a>、<a href="https://xkcd.com/399/" target="_blank" rel="noopener" title="XKCD: Travelling Salesman Problem">流行文化</a>中都出现过这一问题问题的影子。旅行商问题的基本内容非常简单：一位推销员要去一些城市推销商品，已知城市的位置和两两之间的距离，希望能寻找到一条能便利所有城市，并且每个城市只去一次，最后回到出发城市的路径，以节约时间和旅行成本。</p>
-<p>即使不经过任何转化，原始形式的旅行商问题就可以直接应用在路径规划、后勤学、芯片电路设计等场景中，稍加改动，又可以用来解决 DNA 测序等问题的子问题，因此旅行商问题是优化领域中被研究的最多的问题之一。</p>
-<h2 id="问题求解"><a href="#问题求解" class="headerlink" title="问题求解"></a>问题求解</h2><p>旅行商问题是 NP 困难问题，因此不存在多项式复杂度的最优解法。对于规模较大的问题，可以采用近似解法。</p>
-<h3 id="贪心法"><a href="#贪心法" class="headerlink" title="贪心法"></a>贪心法</h3><p>用贪心法解 TSP 只需选取一个城市作为起点，然后每一步都选择距离当前位置最近的城市。贪心法通常无法找到非常优秀的解，找到解平均长度比最优解长 25% 左右。但是，存在一些巧妙设计的旅行商问题，使得贪心法反而会找到最差的路径，因此贪心法的使用范围有限。</p>
-<h3 id="局部搜索法"><a href="#局部搜索法" class="headerlink" title="局部搜索法"></a>局部搜索法</h3><p>局部搜索也可以用来求解 TSP ，最常见的方法是 2-opt ，简单来说就是对路线进行“拧麻花”式的优化。<br><img src="/images/tsp-2-opt_wiki.png" alt="TSP 2-opt 优化思路" title="TSP 2-opt 优化思路"><br>正如图中上半部分那样， $be$ 和 $df$ 两条路线有交叉，如果能将 $cde$ 部分调转重新接入路径，则 TSP 的总距离可以减少。如果能尽可能多地尝试可能的翻转方式，如果翻转之后总路径能缩短则保留翻转并继续搜索，直至无法通过翻转部分路径缩短总距离为止，可以得到一条比较优秀的遍历所有城市的旅行路线。</p>
-<p>很多时候， 2-opt “拧麻花” 的效果还不够好，还可以采用同时翻转更多段路径的 <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem#k-opt_heuristic,_or_Lin–Kernighan_heuristics" target="_blank" rel="noopener" title="TSP k-opt">k-opt</a> 以及可以动态调整翻转段落数的 <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem#V-opt_heuristic" target="_blank" rel="noopener" title="TSP V-opt">v-opt</a> 。这些搜索方法的效果更好，但复杂度也更高。 2-opt 的代码在<a href="https://github.com/jixinfeng/discopt-soln/tree/master/week-04-tsp" target="_blank" rel="noopener" title="TSP Solution">这里</a>。</p>
+        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>车辆路径问题同样是一个和实际生活非常接近的问题。问题设定中包含 $M$ 个客户，每个客户有需求 $d_i$ 和所在的位置 $(x, y)$ 。位于起点的仓库可以派出 $N$ 辆送货车，每辆车有最大送货容量 $C$ ，车辆基础成本为 $S$，从 a 点开车到 b 点的成本和距离成正比。车辆要覆盖所有客户的需求，不重不漏，并且优化目标为求最少送货成本、需要的送货车辆数量 $N$，以及每辆车的路径。</p>
+<h2 id="局部搜索"><a href="#局部搜索" class="headerlink" title="局部搜索"></a>局部搜索</h2><p>由于车辆路径问题变量太多，总车辆数、每辆车负责的客户以及客户的顺序均可以调整，因此即时通过构建整数规划的标准形式并通过工具包求解，效率也不会太高。为了完成作业，这里我们只采用局部搜索的方式解决问题。</p>
+<p>局部搜索的资料有很多，<a href="https://www.researchgate.net/publication/318284891_A_PATH-EXCHANGE-TYPE_LOCAL_SEARCH_ALGORITHM_FOR_VEHICLE_ROUTING_AND_ITS_EFFICIENT_SEARCH_STRATEGY" target="_blank" rel="noopener" title="VRP Paper">这一篇文章</a>和我们要解决的问题非常吻合，因此我们尝试复现文章中设计的搜索方法求解问题。</p>
+<p>为了避免歧义，我们先定义一些术语：</p>
+<ul>
+<li>一辆车从客户 a 直接行驶到客户 b 时，我们称这辆车驶过了一条“边” （ edge ）</li>
+<li>一辆车连续驶过多个客户，即驶过多条首尾相连的边时，我们称这辆车驶过了一段“路径” （ path ）</li>
+<li>一辆车从起点出发，途径所有分配给它的客户，最终回到起点时，我们称这辆车驶过了一条“回路” ( route )</li>
+</ul>
+<p>有了这些术语，我们就可以定义四种基本的局部搜索模式了。</p>
+<h3 id="路径平移-Shift"><a href="#路径平移-Shift" class="headerlink" title="路径平移 Shift"></a>路径平移 Shift</h3><p><img src="/images/vrp-shift.png" alt="VRP 路径平移" title="TSP 2-opt 优化思路"></p>
+<p>路径平移，就是将一条回路中的部分路径移动到另一条回路中的某个位置，可以正接也可以反接。如果在不违反限制条件的情况下，可以讲一整条回路平移到另一回路中，那也就相当于合并了两条回路，减少了一辆车的需求。</p>
+<h3 id="路径交换-Interchange"><a href="#路径交换-Interchange" class="headerlink" title="路径交换 Interchange"></a>路径交换 Interchange</h3><p><img src="/images/vrp-interchange.png" alt="VRP 路径交换" title="TSP 2-opt 优化思路"></p>
+<p>路径交换，与平移类似，就是交换两个回路中各自的两端路径，由于两路径均可以在交换之后正接反接，因此一次交换可以产生四种可能的结果。</p>
+<h3 id="回路内换边-2-exchange"><a href="#回路内换边-2-exchange" class="headerlink" title="回路内换边 2-exchange"></a>回路内换边 2-exchange</h3><p><img src="/images/vrp-exchange.png" alt="VRP 回路内换边" title="TSP 2-opt 优化思路"></p>
+<p>回路内换边，和 TSP 的 2-opt 操作相同，即重新连接一条回路内两条边，进行一个“拧麻花”的操作。</p>
+<h3 id="回路间首尾重组-Ladder"><a href="#回路间首尾重组-Ladder" class="headerlink" title="回路间首尾重组 Ladder"></a>回路间首尾重组 Ladder</h3><p><img src="/images/vrp-ladder.png" alt="VRP 回路间首尾重组" title="TSP 2-opt 优化思路"></p>
+<p>回路间首尾重组，就是在两条回路中各自设置一个断点，将两条回路断点两侧的路径重新连接形成两条新回路。根据首尾连接的方式不同，可以产生两种结果。</p>
+<h3 id="搜索初始解"><a href="#搜索初始解" class="headerlink" title="搜索初始解"></a>搜索初始解</h3><p>局部搜索在操作过程中，只能在有效解间进行搜索并优化目标函数，因此需要找到一个效果不是很好但是可行的解作为搜索的起点。由于车辆路径问题变量多、关联性强、限制条件多，因此很难直接得到一组可行解。在这里我们采用贪心法得到第一组可行解并开始搜索。</p>
+<p>搜索的过程是：每当还有顾客没有覆盖到但当前没有车辆有足够容量时，增加一辆货车，从目前没有被覆盖的需求最小的客户开始送货，直至容量不足。如此操作直至所有客户都被覆盖。这样可以保证每个客户覆盖不重不漏，并且车辆容量都足够。</p>
+<p>找到初始解之后，就可以开始进行局部搜索，直至达到最大搜索时间、最大搜索次数或者无法通过局部搜索找到更优解为止。求解代码在<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-07-vrp/" target="_blank" rel="noopener" title="VRP Solution">这里</a>。</p>
 
     </div>
 
@@ -245,8 +262,7 @@
           <div class="post-tags">
               <a href="/tags/optimization/" rel="tag"># optimization</a>
               <a href="/tags/coursera/" rel="tag"># coursera</a>
-              <a href="/tags/greedy/" rel="tag"># greedy</a>
-              <a href="/tags/tsp/" rel="tag"># tsp</a>
+              <a href="/tags/heuristic/" rel="tag"># heuristic</a>
           </div>
 
         
@@ -255,12 +271,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2018/09/14/Discrete-Optimization-Note-3-Set-Cover/" rel="prev" title="Discrete Optimization 学习笔记 (3) 集合覆盖问题">
-      <i class="fa fa-chevron-left"></i> Discrete Optimization 学习笔记 (3) 集合覆盖问题
+    <a href="/2018/09/19/Discrete-Optimization-Note-4-TSP/" rel="prev" title="Discrete Optimization 学习笔记 (4) 旅行商问题">
+      <i class="fa fa-chevron-left"></i> Discrete Optimization 学习笔记 (4) 旅行商问题
     </a></div>
       <div class="post-nav-item">
-    <a href="/2018/09/30/Discrete-Optimization-Note-6-VRP/" rel="next" title="Discrete Optimization 学习笔记 (6) 车辆路径问题">
-      Discrete Optimization 学习笔记 (6) 车辆路径问题 <i class="fa fa-chevron-right"></i>
+    <a href="/2019/11/19/Discrete-Optimization-Note-5-Facility-Location/" rel="next" title="Discrete Optimization 学习笔记（5）设施选址问题">
+      Discrete Optimization 学习笔记（5）设施选址问题 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -321,7 +337,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题求解"><span class="nav-number">2.</span> <span class="nav-text">问题求解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#贪心法"><span class="nav-number">2.1.</span> <span class="nav-text">贪心法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#局部搜索法"><span class="nav-number">2.2.</span> <span class="nav-text">局部搜索法</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#局部搜索"><span class="nav-number">2.</span> <span class="nav-text">局部搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#路径平移-Shift"><span class="nav-number">2.1.</span> <span class="nav-text">路径平移 Shift</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路径交换-Interchange"><span class="nav-number">2.2.</span> <span class="nav-text">路径交换 Interchange</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回路内换边-2-exchange"><span class="nav-number">2.3.</span> <span class="nav-text">回路内换边 2-exchange</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回路间首尾重组-Ladder"><span class="nav-number">2.4.</span> <span class="nav-text">回路间首尾重组 Ladder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#搜索初始解"><span class="nav-number">2.5.</span> <span class="nav-text">搜索初始解</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

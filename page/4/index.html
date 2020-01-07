@@ -174,6 +174,89 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2017/10/31/Leetcode-269-Alien-Dictionary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jx.f">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="东罗谷乡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/10/31/Leetcode-269-Alien-Dictionary/" class="post-title-link" itemprop="url">Leetcode 269 Alien Dictionary</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-10-31 23:40:45" itemprop="dateCreated datePublished" datetime="2017-10-31T23:40:45-04:00">2017-10-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/leetcode/" itemprop="url" rel="index">
+                    <span itemprop="name">leetcode</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="题目要求："><a href="#题目要求：" class="headerlink" title="题目要求："></a><a href="https://leetcode.com/problems/alien-dictionary/description/" target="_blank" rel="noopener" title="Alien Dictionary">题目要求</a>：</h2><p>一门外语由拉丁字母组成，但是他们的顺序和英语不一样。现有一个非空的单词列表，其中的单词已经根据该门外语的字母顺序排好序，尝试根据该列表推测字母顺序，输出字符串。当顺序中存在循环时输出空字符串，无法判明顺序的可以自由排列。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &quot;wrt&quot;,</span><br><span class="line">  &quot;wrf&quot;,</span><br><span class="line">  &quot;er&quot;,</span><br><span class="line">  &quot;ett&quot;,</span><br><span class="line">  &quot;rftt&quot;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>可以得到字母顺序：<code>&quot;wertf&quot;</code></p>
+<h2 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h2><p>可以采取<a href="https://en.wikipedia.org/wiki/Topological_sorting" target="_blank" rel="noopener" title="拓扑排序/Topological sorting">拓扑排序</a>，把整个字母顺序想象成一张有向图，字母是顶点，先后顺序是边（箭头）。先找到所有入度的顶点——即顺序最靠前的字母——放入栈，每次弹出一个字母放入字母顺序表。再找出排在他们之后的字母，将他们的入度减1，如果入度变为0了就将该字母也入栈，如此循环直至队列为空。</p>
+<p>此时如果图中仍有边，则图中存在循环，无法拓扑排序，否则排序完成，得到字母顺序表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">alienOrder</span><span class="params">(self, words)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type words: List[str]</span></span><br><span class="line"><span class="string">        :rtype: str</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> words <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> words == []:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">        chars = set().union(*map(set, words))</span><br><span class="line">        outs = &#123;c : set() <span class="keyword">for</span> c <span class="keyword">in</span> chars&#125;</span><br><span class="line">        indegrees = &#123;c : <span class="number">0</span> <span class="keyword">for</span> c <span class="keyword">in</span> chars&#125;</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(words) - <span class="number">1</span>):</span><br><span class="line">            before, after = words[i], words[i + <span class="number">1</span>]</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> range(min(len(before), len(after))):</span><br><span class="line">                <span class="keyword">if</span> before[j] != after[j]:</span><br><span class="line">                    <span class="keyword">if</span> after[j] <span class="keyword">not</span> <span class="keyword">in</span> outs[before[j]]:</span><br><span class="line">                        indegrees[after[j]] += <span class="number">1</span></span><br><span class="line">                        outs[before[j]].add(after[j])</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        q = [k <span class="keyword">for</span> k, v <span class="keyword">in</span> indegrees.items() <span class="keyword">if</span> v == <span class="number">0</span>]</span><br><span class="line">        soln = []</span><br><span class="line">        <span class="keyword">while</span> q:</span><br><span class="line">            curr_char = q.pop()</span><br><span class="line">            soln.append(curr_char)</span><br><span class="line">            <span class="keyword">for</span> next_char <span class="keyword">in</span> outs[curr_char]:</span><br><span class="line">                indegrees[next_char] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">if</span> indegrees[next_char] == <span class="number">0</span>:</span><br><span class="line">                    q.append(next_char)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> max(indegrees.values()) &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span>.join(soln)</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2017/10/29/Leetcode-681-Next-Closest-Time/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -864,7 +947,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
+                <time title="Modified: 2020-01-07 00:00:32" itemprop="dateModified" datetime="2020-01-07T00:00:32-05:00">2020-01-07</time>
               </span>
 
           
@@ -882,7 +965,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ /usr/bin/ruby -e <span class="string">"<span class="variable">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)</span>"</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="安装-npm，git-和-hexo"><a href="#安装-npm，git-和-hexo" class="headerlink" title="安装 npm，git 和 hexo"></a>安装 <code>npm</code>，<code>git</code> 和 <code>hexo</code></h3><p>首先通过 <code>homebrew</code> 安装 <code>npm</code> 和 <code>git</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ brew update</span><br><span class="line">$ brew install npm npv git</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ brew update</span><br><span class="line">$ brew install npm git</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
 
@@ -915,6 +998,12 @@
 
 <p>开启 <code>per_page</code> 之后，需要在文章开头处手动启用 <code>mathjax</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: title.html</span><br><span class="line">date: 2017-01-01 12:01:30</span><br><span class="line">tags:</span><br><span class="line">mathjax: <span class="literal">true</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<h2 id="设置自定义域名"><a href="#设置自定义域名" class="headerlink" title="设置自定义域名"></a>设置自定义域名</h2><p>在 <code>source</code> 文件夹中增加一个 <code>CNAME</code> 文件，文件名大写，内容只有一行即为自己的自定义域名。在命令行中运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ dig &#123;github_username&#125;.github.io</span><br></pre></td></tr></table></figure>
+
+<p>即可得到博客托管的 IP 地址，在自己的 DNS 中加入地址即可。主意对DNS的配置不是即时生效的，需要等待几分钟再去访问你的域名试试有没有配置成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@          A             &#123;ip_1&#125;</span><br><span class="line">@          A             &#123;ip_2&#125;</span><br><span class="line">www      CNAME           &#123;github_username&#125;.github.io.</span><br></pre></td></tr></table></figure>
 
 <h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><ul>
 <li><a href="https://hexo.io/docs/" target="_blank" rel="noopener" title="Hexo Documentations">Hexo Documentations</a></li>
@@ -1008,7 +1097,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-count">40</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1019,7 +1108,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
