@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://jixinfeng.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="问题描述着色问题来自于人们绘制地图的需求。在绘制地图时，人们希望相邻的国家使用不同的颜色，并且使用尽可能少的颜色绘制整张地图。 进行数学抽象后，问题就变成了：给定一个无向图 $\mathcal{G}(\mathcal{V},\mathcal{E})$ ，其中 $\mathcal{V}$ 为顶点集合， $\mathcal{E}$ 为边集合，希望找到 $\mathcal{V}$ 的一个划分将其分成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Discrete Optimization 学习笔记 (2) 图着色问题">
+<meta property="og:url" content="http://jixinfeng.github.io/2018/04/30/Discrete-Optimization-Note-2-Graph-Coloring/index.html">
+<meta property="og:site_name" content="东罗谷乡">
+<meta property="og:description" content="问题描述着色问题来自于人们绘制地图的需求。在绘制地图时，人们希望相邻的国家使用不同的颜色，并且使用尽可能少的颜色绘制整张地图。 进行数学抽象后，问题就变成了：给定一个无向图 $\mathcal{G}(\mathcal{V},\mathcal{E})$ ，其中 $\mathcal{V}$ 为顶点集合， $\mathcal{E}$ 为边集合，希望找到 $\mathcal{V}$ 的一个划分将其分成">
+<meta property="article:published_time" content="2018-04-30T17:06:34.000Z">
+<meta property="article:modified_time" content="2020-01-07T04:37:08.139Z">
+<meta property="article:author" content="jx.f">
+<meta property="article:tag" content="optimization">
+<meta property="article:tag" content="coursera">
+<meta property="article:tag" content="ilp">
+<meta property="article:tag" content="greedy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jixinfeng.github.io/2018/04/30/Discrete-Optimization-Note-2-Graph-Coloring/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Discrete Optimization 学习笔记 (2) 图着色问题 | 东罗谷乡</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">东罗谷乡</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/04/30/Discrete-Optimization-Note-2-Graph-Coloring/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jx.f">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="东罗谷乡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Discrete Optimization 学习笔记 (2) 图着色问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-04-30 13:06:34" itemprop="dateCreated datePublished" datetime="2018-04-30T13:06:34-04:00">2018-04-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>着色问题来自于人们绘制地图的需求。在绘制地图时，人们希望相邻的国家使用不同的颜色，并且使用尽可能少的颜色绘制整张地图。</p>
+<p>进行数学抽象后，问题就变成了：给定一个无向图 $\mathcal{G}(\mathcal{V},\mathcal{E})$ ，其中 $\mathcal{V}$ 为顶点集合， $\mathcal{E}$ 为边集合，希望找到 $\mathcal{V}$ 的一个划分将其分成 $K$ 组，使得每个划分中的顶点均互不相邻。最小着色问题得目标即是找到满足条件的最小的 $K$ 。</p>
+<p>与<a href="/2017/12/06/Discrete-Optimization-Note-1-Knapsack/" title="背包问题">背包问题</a>一样，图着色问题也是 NP 完全问题，因此无法找出多项式时间的最优解法。不过通过贪心法可以快速找到高质量的次优解，并可以以此为基础通过整数规划找到最优解。</p>
+<h2 id="贪心法"><a href="#贪心法" class="headerlink" title="贪心法"></a>贪心法</h2><p>用贪心法解决着色问题的基本思路非常简单，主要步骤为：</p>
+<ol>
+<li>通过某种贪心策略不断寻找图中的不相连点集</li>
+<li>将每次找到的点集指定一种颜色并从图中去掉这些顶点</li>
+<li>重复1、2两步直至所有定点均被着色</li>
+</ol>
+<p>Python 下常用的图论分析软件包 <a href="https://networkx.github.io" target="_blank" rel="noopener" title="NetworkX">NetworkX</a> 中已经提供了很多常见的贪心策略和着色函数。因此贪心法解染色问题最简单的实现就是对于给定的图 $\mathcal{G}(\mathcal{V},\mathcal{E})$ ，将所有贪心策略均尝试一遍，保留所需颜色数最小的解。贪心解法函数的 <code>python</code> 代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greedy</span><span class="params">(node_count, edges)</span>:</span></span><br><span class="line">    graph = nx.Graph()</span><br><span class="line">    graph.add_nodes_from(range(node_count))</span><br><span class="line">    graph.add_edges_from(edges)</span><br><span class="line"></span><br><span class="line">    strategies = [nx.coloring.strategy_largest_first,</span><br><span class="line">                  nx.coloring.strategy_random_sequential,</span><br><span class="line">                  nx.coloring.strategy_smallest_last,</span><br><span class="line">                  nx.coloring.strategy_independent_set,</span><br><span class="line">                  nx.coloring.strategy_connected_sequential_bfs,</span><br><span class="line">                  nx.coloring.strategy_connected_sequential_dfs,</span><br><span class="line">                  nx.coloring.strategy_connected_sequential,</span><br><span class="line">                  nx.coloring.strategy_saturation_largest_first]</span><br><span class="line"></span><br><span class="line">    best_color_count, best_coloring = node_count, &#123;i: i <span class="keyword">for</span> i <span class="keyword">in</span> range(node_count)&#125;</span><br><span class="line">    <span class="keyword">for</span> strategy <span class="keyword">in</span> strategies:</span><br><span class="line">        curr_coloring = nx.coloring.greedy_color(G=graph, strategy=strategy)</span><br><span class="line">        curr_color_count = max(curr_coloring.values()) + <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> curr_color_count &lt; best_color_count:</span><br><span class="line">            best_color_count = curr_color_count</span><br><span class="line">            best_coloring = curr_coloring</span><br><span class="line">    <span class="keyword">return</span> best_color_count, <span class="number">0</span>, [best_coloring[i] <span class="keyword">for</span> i <span class="keyword">in</span> range(node_count)]</span><br></pre></td></tr></table></figure>
+
+<h2 id="整数规划"><a href="#整数规划" class="headerlink" title="整数规划"></a>整数规划</h2><p>着色问题同样可以转换成标准 ILP 形式之后利用 gurobi 求解。构造方法可以参考一本老教材 <a href="http://web.mit.edu/15.053/www/AMP.htm" target="_blank" rel="noopener" title="Applied Mathematical Programming">Applied Mathematical Programming</a> 中第九章 <a href="http://web.mit.edu/15.053/www/AMP-Chapter-09.pdf" target="_blank" rel="noopener" title="Integer Programming">Integer Programming</a> （整数规划）给出的例子。</p>
+<h3 id="标准形式"><a href="#标准形式" class="headerlink" title="标准形式"></a>标准形式</h3><p>令 $N=|\mathcal{V}|$ ，设置两组变量 $y_0, y_1, \ldots, y_{N-1}$ 以及 $x_{00}, x_{01}\ldots, x_{0(N-1)},\ldots, x_{(N-1)(N-1)}$ 。其中 $y_k=1$ 表示使用第 $i$ 种颜色 $x_{ik}=1$ 表示顶点 $i$ 使用颜色 $k$ 进行着色。可以列出优化问题标准形式如下：</p>
+<p>$$\begin{align<em>}<br>\min  &amp; \sum y_{i} \<br> s.t. &amp; \sum_{k=0}^{N-1} x_{ik}=1 &amp; i=1,\ldots, N\<br>      &amp; x_{ik} - y_k\leq 0        &amp; i,k=1,\ldots, N \<br>      &amp; x_{ik}+x_{jk}\leq 1       &amp; (i,j)\in\mathcal{E}\<br>      &amp; x_{ik},y_k\in{0,1}<br>\end{align</em>}$$</p>
+<p>将题目中给定的数据按标准形式输入到 gurobi 中即可求得最优解，但是随着图规模的增加，解题所需的时间也以极快的速度增长。因此，需要对标准形式进行一些改进，进一步提高性能</p>
+<h3 id="性能优化1：去除可能的重复解"><a href="#性能优化1：去除可能的重复解" class="headerlink" title="性能优化1：去除可能的重复解"></a>性能优化1：去除可能的重复解</h3><p>因为着色问题有对称性，因此通过标准形式可以得到很多等价的着色问题的解法。比如，有5种可能的颜色（1，2，3，4，5）可供选择时，如果最优解的着色数是3，那么选择（1，2，3）和（3，4，5）以及（1，3，5）等任意三种颜色都是等价的，但是在 ILP 中他们表示的是完全不同的解。因此需要增加一条限制：优先选择编号更小的颜色。</p>
+<p>此外，对于一个已知的解，对调两组采用了不同颜色的顶点的着色，得到的新解和原来的解也是等价的，但是在 ILP 中对调颜色的解会被认为是不同的。因此需要增加第二条限制，编号小的颜色应该对尽可能多的顶点进行着色。</p>
+<h3 id="性能优化2：减少可选的颜色"><a href="#性能优化2：减少可选的颜色" class="headerlink" title="性能优化2：减少可选的颜色"></a>性能优化2：减少可选的颜色</h3><p>ILP 标准形式中，由于不知道最少可以使用多少种颜色，因此在初始化时必须使用 $N$ 种颜色，即假设每个定点都需要一种不同的颜色，这样就需要 $N^2+N$ 个变量。但是根据贪心法得出的次优解可以看出：对于作业题目中给出的数据，着色所需的颜色数通常远远小于图的定点数。因此可以在初始化 ILP 之前，先使用贪心法求的次优解所需的颜色数 $m$，并按有 $m$ 个可选颜色设置 ILP ，这样可以大大减少 ILP 的规模。</p>
+<h3 id="性能优化3：用贪心法的解初始化-ILP"><a href="#性能优化3：用贪心法的解初始化-ILP" class="headerlink" title="性能优化3：用贪心法的解初始化 ILP"></a>性能优化3：用贪心法的解初始化 ILP</h3><p>在用贪心法获得了次优解之后，可以同时使用次优解的值为 ILP 各个变量赋初始值值，减少 ILP 寻找第一个可行解所需的时间。但是根据观察，这个做法带来的性能提升似乎并不明显。</p>
+<p>完整<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-03-coloring/solver.py" target="_blank" rel="noopener" title="Graph Coloring Solution">解题代码</a>比较长，就不在这里贴了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/optimization/" rel="tag"># optimization</a>
+              <a href="/tags/coursera/" rel="tag"># coursera</a>
+              <a href="/tags/ilp/" rel="tag"># ilp</a>
+              <a href="/tags/greedy/" rel="tag"># greedy</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/18/Union-Find/" rel="prev" title="并查集与合并-查找算法的 Python 实现">
+      <i class="fa fa-chevron-left"></i> 并查集与合并-查找算法的 Python 实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/01/update-lc-index/" rel="next" title="（半）自动更新 LeetCode 解题进度">
+      （半）自动更新 LeetCode 解题进度 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#贪心法"><span class="nav-number">2.</span> <span class="nav-text">贪心法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#整数规划"><span class="nav-number">3.</span> <span class="nav-text">整数规划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#标准形式"><span class="nav-number">3.1.</span> <span class="nav-text">标准形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#性能优化1：去除可能的重复解"><span class="nav-number">3.2.</span> <span class="nav-text">性能优化1：去除可能的重复解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#性能优化2：减少可选的颜色"><span class="nav-number">3.3.</span> <span class="nav-text">性能优化2：减少可选的颜色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#性能优化3：用贪心法的解初始化-ILP"><span class="nav-number">3.4.</span> <span class="nav-text">性能优化3：用贪心法的解初始化 ILP</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">jx.f</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">jx.f</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://jixinfeng.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="简介在很多和网络有关的场景中，我们常常需要进行一类操作：记录节点之间是否直接相连，然后计算两个节点之间是否能通过某些邻居而间接连接。比如：在社交网络中，我们希望能够快速知道两个人是否可以通过某些共同好友而建立联系；在地图中，我们希望能够快速知道两地之间是否存在一条通路。如果我们只需要判断这样的连接是否存在而不需要知道具体的连接路径，基于并查集的合并-查找算法 (Union Find) 就是一种非常">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并查集与合并-查找算法的 Python 实现">
+<meta property="og:url" content="http://jixinfeng.github.io/2018/01/18/Union-Find/index.html">
+<meta property="og:site_name" content="东罗谷乡">
+<meta property="og:description" content="简介在很多和网络有关的场景中，我们常常需要进行一类操作：记录节点之间是否直接相连，然后计算两个节点之间是否能通过某些邻居而间接连接。比如：在社交网络中，我们希望能够快速知道两个人是否可以通过某些共同好友而建立联系；在地图中，我们希望能够快速知道两地之间是否存在一条通路。如果我们只需要判断这样的连接是否存在而不需要知道具体的连接路径，基于并查集的合并-查找算法 (Union Find) 就是一种非常">
+<meta property="article:published_time" content="2018-01-18T21:06:02.000Z">
+<meta property="article:modified_time" content="2020-01-07T04:37:08.147Z">
+<meta property="article:author" content="jx.f">
+<meta property="article:tag" content="graph">
+<meta property="article:tag" content="unionfind">
+<meta property="article:tag" content="tree">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jixinfeng.github.io/2018/01/18/Union-Find/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>并查集与合并-查找算法的 Python 实现 | 东罗谷乡</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">东罗谷乡</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/01/18/Union-Find/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jx.f">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="东罗谷乡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并查集与合并-查找算法的 Python 实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-01-18 16:06:02" itemprop="dateCreated datePublished" datetime="2018-01-18T16:06:02-05:00">2018-01-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>在很多和网络有关的场景中，我们常常需要进行一类操作：记录节点之间是否直接相连，然后计算两个节点之间是否能通过某些邻居而间接连接。比如：在社交网络中，我们希望能够快速知道两个人是否可以通过某些共同好友而建立联系；在地图中，我们希望能够快速知道两地之间是否存在一条通路。如果我们只需要判断这样的连接是否存在而不需要知道具体的连接路径，基于<a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure" target="_blank" rel="noopener" title="Union Find">并查集</a>的合并-查找算法 (Union Find) 就是一种非常有用的方法。</p>
+<h2 id="数据结构和方法"><a href="#数据结构和方法" class="headerlink" title="数据结构和方法"></a>数据结构和方法</h2><p>并查集是一种树形的数据结构，其思路就是维护一颗节点的树，当两个不直接相连的节点具有相同的根结点时，就可以认为两个节点存在连接。顾名思义， Union Find 需要用到两个方法：</p>
+<ul>
+<li><code>union</code> 即合并，负责记录节点之间的连接关系</li>
+<li><code>find</code> 即查找，负责查询输入的两个点之间是否存在相连关系</li>
+</ul>
+<p>同时，在初始化时还要制定节点数 <code>n</code> 。</p>
+<h2 id="Quick-Find"><a href="#Quick-Find" class="headerlink" title="Quick Find"></a>Quick Find</h2><p>Quick Find 可以保证在常数时间复杂度内完成查找，采用的思路是维护一颗扁平的树：<br>在数据结构中添加一个数组 <code>idx</code> 负责记录每个节点的父节点，根节点的 <code>idx</code> 值就是自己，即 <code>idx[i]=i</code>。在每次执行一次 <code>union</code> 操作时，如 <code>union(p, q)</code> 将 <code>idx[p]</code> 的值设置为 <code>q</code> ，并且遍历所有节点，如果 <code>idx[i]==p</code> 即 <code>p</code> 是 <code>i</code> 的父节点，则重新设置 <code>idx[i]=q</code> 。保证每个节点的父节点就是根结点。查找时，调用 <code>find(a, b)</code> ，只需判断 <code>idx[a]==idx[b]</code> 即可，复杂度为 $O(1)$。</p>
+<p>虽然 Quick Find 可以非常高效地进行查找，但是每次添加一条新边时，都要扫描一遍所有节点的父节点，添加每个节点的连接关系时都需要 $O(N)$ 次操作，扩展性较差。</p>
+<p>Quick Find 的代码为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">quickFind</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, n)</span>:</span></span><br><span class="line">        self.nodes = n</span><br><span class="line">        self.idx = list(range(n))</span><br><span class="line">        self.parts = n</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">union</span><span class="params">(self, edge)</span>:</span></span><br><span class="line">        p, q = edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        idxp, idxq = self.idx[p], self.idx[q]</span><br><span class="line">        <span class="keyword">if</span> idxp == idxq:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">            <span class="keyword">if</span> self.idx[i] == idxp:</span><br><span class="line">                self.idx[i] == idxq</span><br><span class="line">        self.parts -= <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">find</span><span class="params">(self, p, q)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.idx[p] == self.idx[q]</span><br></pre></td></tr></table></figure>
+
+<h2 id="Quick-Union"><a href="#Quick-Union" class="headerlink" title="Quick Union"></a>Quick Union</h2><p>Quick Find 的 union 操作效率太低，为了提升 union 效率，可以改用 Quick Union 的做法。 Quick Union 不能保证在常数时间复杂度内完成查找，但是可以快速添加新边。</p>
+<p>Quick Union 不再保证树是扁平的，而是在每次执行 <code>union(p, q)</code> 时，找到 <code>p</code> 和 <code>q</code> 所在树的根节点 <code>rp</code> 、 <code>rq</code> ，并且将 <code>rq</code> 设置为 <code>rp</code> 的父节点，在查找时，同样找到对比两个点所在的根结点即可。 Quick Union 的时间复杂度就完全取决于树的深度，但是对树的平衡性完全没有控制，因此在最坏情况下，输入的数据是一条链形的结构，即树变成了链表，那么 <code>union</code> 和 <code>find</code> 的复杂度都会变成 $O(N)$ ，比 Quick Find 还要差。</p>
+<p>Quick Union 的代码如下，由于经产需要查找根结点的操作，因此单独定义了 <code>root</code> 函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">quickUnion</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, n)</span>:</span></span><br><span class="line">        self.nodes = n</span><br><span class="line">        self.idx = list(range(n))</span><br><span class="line">        self.parts = n</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">root</span><span class="params">(self, node)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> node != self.idx[node]:</span><br><span class="line">            node = self.idx[node]</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">union</span><span class="params">(self, edge)</span>:</span></span><br><span class="line">        p, q = edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        rootp, rootq = self.root(p), self.root(q)</span><br><span class="line">        <span class="keyword">if</span> rootp == rootq:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            self.idx[rootp] = rootq</span><br><span class="line">            self.parts -= <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">find</span><span class="params">(self, p, q)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.root(p) == self.root(q)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Weighted-Quick-Union"><a href="#Weighted-Quick-Union" class="headerlink" title="Weighted Quick Union"></a>Weighted Quick Union</h2><p>Quick Union 的时间复杂度高度依赖于树的高度，但是对树的平衡性完全没有控制，会无条件地将 <code>rq</code> 设置为 <code>rp</code> 的父节点。因此，如果能让并查集的树形结构尽可能平衡，树的高度数量级就不会超过 $O(log N)$ ，可以有效降低时间复杂度。</p>
+<p>为了实现这一点，我们需要在并查集中增加一个 <code>size</code> 数组，记录每个节点及其子节点的数量总和，这样当合并两棵树时，只需要比较两个根结点的 <code>size</code> 值，将尺寸较小树的根结点的父节点指向尺寸较大树的根结点，就可以尽量保持树的平衡性了。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">weightedQuickUnion</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, n)</span>:</span></span><br><span class="line">        self.nodes = n</span><br><span class="line">        self.idx = list(range(n))</span><br><span class="line">        self.size = [<span class="number">1</span>] * n</span><br><span class="line">        self.parts = n</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">root</span><span class="params">(self, node)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> node != self.idx[node]:</span><br><span class="line">            node = self.idx[node]</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">union</span><span class="params">(self, edge)</span>:</span></span><br><span class="line">        p, q = edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        rootp, rootq = self.root(p), self.root(q)</span><br><span class="line">        <span class="keyword">if</span> rootp == rootq:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">elif</span> self.size[rootp] &gt; self.size[rootq]:</span><br><span class="line">            self.idx[rootq] = rootp</span><br><span class="line">            self.size[rootp] += self.size[rootq]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            self.idx[rootp] = rootq</span><br><span class="line">            self.size[rootq] += self.size[rootp]</span><br><span class="line">        self.parts -= <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">find</span><span class="params">(self, p, q)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.root(p) == self.root(q)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Weighted-Quick-Union-with-Path-Compression"><a href="#Weighted-Quick-Union-with-Path-Compression" class="headerlink" title="Weighted Quick Union with Path Compression"></a>Weighted Quick Union with Path Compression</h2><p>Weighted Quick Union 的效果已经很好了，但是并查集的潜力还没有完全发掘出来：既然每次运行 <code>root</code> 方法时，都会找到根结点，那何不直接将途中找到的所有节点直接指向该根结点呢？这样做的代价是：由于 <code>root</code> 方法会经常被调用，频繁地生成和销毁中间节点数组带来的成本会很高。因此我们采用一种开销更低，但是效果接近的路径压缩做法：在寻找根结点时，将所有节点的父节点换成其祖父节点，这样每次执行 <code>root</code> 时，路径的长度都会被压缩一次，额外的内存开销为常数，并且额外的代码只有一行。我们只需要把 <code>root</code> 稍作修改即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">root</span><span class="params">(self, node)</span>:</span></span><br><span class="line">    <span class="keyword">while</span> node != self.idx[node]:</span><br><span class="line">        <span class="comment"># 将祖父节点变成父节点</span></span><br><span class="line">        self.idx[node] = self.idx[self.idx[node]] </span><br><span class="line">        node = self.idx[node]</span><br><span class="line">    <span class="keyword">return</span> node</span><br></pre></td></tr></table></figure>
+
+<p>经过简单的修改，带来的性能提升是惊人的，经过路径压缩之后，<code>union</code> 和 <code>find</code> 复杂度的一个比较宽松的上界是 $O(log ^* N)$ ，即<a href="https://en.wikipedia.org/wiki/Iterated_logarithm" target="_blank" rel="noopener" title="Iterated logarithm">迭代对数</a>，其定义为对 $N$ 反复进行对数操作，得到一个小于 1 的结果所需进行的对数运算次数，另一个更紧凑的上界是 $O(\alpha(N))$ 即<a href="https://en.wikipedia.org/wiki/Ackermann_function#Inverse" target="_blank" rel="noopener" title="Inverse Ackermann Function">反阿克曼函数 </a>。这两个函数的增长速度都极为缓慢，对于我们通常能见到的数量级的输入，可以认为这两个函数的值不会超过 5 ，如 $log ^* 2^{65536}=5 $ 。也就是说，经过路径压缩的并查集，可以做到在非常接近常数复杂度的速度下实现 <code>union</code> 和 <code>find</code> 。</p>
+<h2 id="复杂度列表"><a href="#复杂度列表" class="headerlink" title="复杂度列表"></a>复杂度列表</h2><table>
+<thead>
+<tr>
+<th align="center">Algorithm</th>
+<th align="center">Constructor</th>
+<th align="center">Union</th>
+<th align="center">Find</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Quick Find</td>
+<td align="center">$O(N)$</td>
+<td align="center">$O(N)$</td>
+<td align="center">$O(1)$</td>
+</tr>
+<tr>
+<td align="center">Quick Union</td>
+<td align="center">$O(N)$</td>
+<td align="center">$O(h)$*</td>
+<td align="center">$O(h)$</td>
+</tr>
+<tr>
+<td align="center">Weighted Quick Union</td>
+<td align="center">$O(N)$</td>
+<td align="center">$O(log N)$</td>
+<td align="center">$O(log N)$</td>
+</tr>
+<tr>
+<td align="center">Weighted Quick Union with Path Compression</td>
+<td align="center">$O(N)$</td>
+<td align="center">$O(\alpha(N))$</td>
+<td align="center">$O(\alpha(N))$</td>
+</tr>
+<tr>
+<td align="center">* $h$ 是树的高度</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://algs4.cs.princeton.edu/15uf/" target="_blank" rel="noopener" title="Case Study">Case Study in Algorithms by Robert Sedgewick</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/graph/" rel="tag"># graph</a>
+              <a href="/tags/unionfind/" rel="tag"># unionfind</a>
+              <a href="/tags/tree/" rel="tag"># tree</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/01/Leetcode-010-Regular-Expression-Matching/" rel="prev" title="Leetcode 010 Regular Expression Matching">
+      <i class="fa fa-chevron-left"></i> Leetcode 010 Regular Expression Matching
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/30/Discrete-Optimization-Note-2-Graph-Coloring/" rel="next" title="Discrete Optimization 学习笔记 (2) 图着色问题">
+      Discrete Optimization 学习笔记 (2) 图着色问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据结构和方法"><span class="nav-number">2.</span> <span class="nav-text">数据结构和方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Find"><span class="nav-number">3.</span> <span class="nav-text">Quick Find</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Union"><span class="nav-number">4.</span> <span class="nav-text">Quick Union</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Weighted-Quick-Union"><span class="nav-number">5.</span> <span class="nav-text">Weighted Quick Union</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Weighted-Quick-Union-with-Path-Compression"><span class="nav-number">6.</span> <span class="nav-text">Weighted Quick Union with Path Compression</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复杂度列表"><span class="nav-number">7.</span> <span class="nav-text">复杂度列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">jx.f</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">jx.f</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>
