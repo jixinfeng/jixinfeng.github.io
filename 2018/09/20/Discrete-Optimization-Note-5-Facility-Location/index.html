@@ -46,14 +46,21 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="东罗谷乡">
-<meta property="og:url" content="http://jixinfeng.github.io/archives/2019/index.html">
+  <meta name="description" content="问题描述设施选址问题是一个比较具有现实意义的优化问题。问题可以通过 $N$ 个备选的供应设施位置和 $M$ 个客户来描述。选定一个候选位置建立供应设施 $f$ 的时候需要付出 $s_f$ 的建设成本，并且设施的最大供应量不能超过 $cap_f$ ；与之对应每个客户 $c$ 均有一个需求值 $d_c$ 需要被满足；设施 $f$ 和客户 $c$ 之间的距离为两者之间的欧几里得距离 $d(f, c)$">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Discrete Optimization 学习笔记（5）设施选址问题">
+<meta property="og:url" content="http://jixinfeng.github.io/2018/09/20/Discrete-Optimization-Note-5-Facility-Location/index.html">
 <meta property="og:site_name" content="东罗谷乡">
+<meta property="og:description" content="问题描述设施选址问题是一个比较具有现实意义的优化问题。问题可以通过 $N$ 个备选的供应设施位置和 $M$ 个客户来描述。选定一个候选位置建立供应设施 $f$ 的时候需要付出 $s_f$ 的建设成本，并且设施的最大供应量不能超过 $cap_f$ ；与之对应每个客户 $c$ 均有一个需求值 $d_c$ 需要被满足；设施 $f$ 和客户 $c$ 之间的距离为两者之间的欧几里得距离 $d(f, c)$">
+<meta property="article:published_time" content="2018-09-21T02:43:22.000Z">
+<meta property="article:modified_time" content="2020-01-07T05:04:46.369Z">
 <meta property="article:author" content="jx.f">
+<meta property="article:tag" content="optimization">
+<meta property="article:tag" content="coursera">
+<meta property="article:tag" content="ilp">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://jixinfeng.github.io/archives/2019/">
+<link rel="canonical" href="http://jixinfeng.github.io/2018/09/20/Discrete-Optimization-Note-5-Facility-Location/">
 
 
 <script id="page-configurations">
@@ -61,11 +68,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: false
+    isPost: true
   };
 </script>
 
-  <title>Archive | 东罗谷乡</title>
+  <title>Discrete Optimization 学习笔记（5）设施选址问题 | 东罗谷乡</title>
   
 
 
@@ -169,50 +176,93 @@
           <div class="content">
             
 
+  <div class="posts-expand">
+      
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        
-        <span class="collection-header">OK! 40 posts in total. Keep on posting.</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/20/Discrete-Optimization-Note-5-Facility-Location/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jx.f">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="东罗谷乡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Discrete Optimization 学习笔记（5）设施选址问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-20 22:43:22" itemprop="dateCreated datePublished" datetime="2018-09-20T22:43:22-04:00">2018-09-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-07 00:04:46" itemprop="dateModified" datetime="2020-01-07T00:04:46-05:00">2020-01-07</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <h1 class="collection-header">2019</h1>
+        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p><a href="https://en.wikipedia.org/wiki/Facility_location_problem" target="_blank" rel="noopener" title="Facility Location Problem Wiki Page">设施选址问题</a>是一个比较具有现实意义的优化问题。问题可以通过 $N$ 个备选的供应设施位置和 $M$ 个客户来描述。选定一个候选位置建立供应设施 $f$ 的时候需要付出 $s_f$ 的建设成本，并且设施的最大供应量不能超过 $cap_f$ ；与之对应每个客户 $c$ 均有一个需求值 $d_c$ 需要被满足；设施 $f$ 和客户 $c$ 之间的距离为两者之间的欧几里得距离 $d(f, c)$ ，送货成本等于送货距离。题目要求每个客户的需求必须满足，且至多只能接收一个供应设施的送货，同时所有设施均不能超负荷运转，即供应量不应超过设施容量。优化目标是在满足所有条件的情况下求出成本最低的设施选址以及送货安排。</p>
+<h2 id="整数规划"><a href="#整数规划" class="headerlink" title="整数规划"></a>整数规划</h2><p>此题直接通过整数规划就能获得理想的结果。建立规划模型时，需要分别添加两组变量，一组用来表示是否在一个备选位置上建立设施，共 $N$ 个 0-1 变量，另一组用来表示每个客户接受的供应设施，共 $N\times M$ 个 0-1 变量。设置好变量后，将设施位置成本、容量，客户需求以及每个位置和客户之间的距离设置在限制条件中直接求解即可得到最优解，详见<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-06-facility/solver.py" target="_blank" rel="noopener" title="Facility Location Solution">完整代码</a></p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-11-19T22:43:22-05:00"
-              content="2019-11-19">
-          11-19
-        </time>
-      </div>
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/optimization/" rel="tag"># optimization</a>
+              <a href="/tags/coursera/" rel="tag"># coursera</a>
+              <a href="/tags/ilp/" rel="tag"># ilp</a>
+          </div>
 
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2019/11/19/Discrete-Optimization-Note-5-Facility-Location/" itemprop="url">
-            <span itemprop="name">Discrete Optimization 学习笔记（5）设施选址问题</span>
-          </a>
-      </h2>
+        
 
-    </header>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/19/Discrete-Optimization-Note-4-TSP/" rel="prev" title="Discrete Optimization 学习笔记 (4) 旅行商问题">
+      <i class="fa fa-chevron-left"></i> Discrete Optimization 学习笔记 (4) 旅行商问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/30/Discrete-Optimization-Note-6-VRP/" rel="next" title="Discrete Optimization 学习笔记 (6) 车辆路径问题">
+      Discrete Optimization 学习笔记 (6) 车辆路径问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
   </article>
+  
+  
+  
 
-
-    </div>
   </div>
-  
-  
-  
-
-  
-
 
 
           </div>
@@ -263,6 +313,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#整数规划"><span class="nav-number">2.</span> <span class="nav-text">整数规划</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -374,6 +425,54 @@
   
 
   
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
 
   
 

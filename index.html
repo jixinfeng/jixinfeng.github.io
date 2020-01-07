@@ -174,72 +174,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2019/11/19/Discrete-Optimization-Note-5-Facility-Location/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="jx.f">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="东罗谷乡">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/19/Discrete-Optimization-Note-5-Facility-Location/" class="post-title-link" itemprop="url">Discrete Optimization 学习笔记（5）设施选址问题</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2019-11-19 22:43:22" itemprop="dateCreated datePublished" datetime="2019-11-19T22:43:22-05:00">2019-11-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-06 23:37:08" itemprop="dateModified" datetime="2020-01-06T23:37:08-05:00">2020-01-06</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p><a href="https://en.wikipedia.org/wiki/Facility_location_problem" target="_blank" rel="noopener" title="Facility Location Problem Wiki Page">设施选址问题</a>是一个比较具有现实意义的优化问题。问题可以通过 $N$ 个备选的供应设施位置和 $M$ 个客户来描述。选定一个候选位置建立供应设施 $f$ 的时候需要付出 $s_f$ 的建设成本，并且设施的最大供应量不能超过 $cap_f$ ；与之对应每个客户 $c$ 均有一个需求值 $d_c$ 需要被满足；设施 $f$ 和客户 $c$ 之间的距离为两者之间的欧几里得距离 $d(f, c)$ ，送货成本等于送货距离。题目要求每个客户的需求必须满足，且至多只能接收一个供应设施的送货，同时所有设施均不能超负荷运转，即供应量不应超过设施容量。优化目标是在满足所有条件的情况下求出成本最低的设施选址以及送货安排。</p>
-<h2 id="整数规划"><a href="#整数规划" class="headerlink" title="整数规划"></a>整数规划</h2><p>此题直接通过整数规划就能获得理想的结果。建立规划模型时，需要分别添加两组变量，一组用来表示是否在一个备选位置上建立设施，共 $N$ 个 0-1 变量，另一组用来表示每个客户接受的供应设施，共 $N\times M$ 个 0-1 变量。设置好变量后，将设施位置成本、容量，客户需求以及每个位置和客户之间的距离设置在限制条件中直接求解即可得到最优解，详见<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-06-facility/solver.py" target="_blank" rel="noopener" title="Facility Location Solution">完整代码</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/30/Discrete-Optimization-Note-6-VRP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -306,6 +240,72 @@
 <h3 id="搜索初始解"><a href="#搜索初始解" class="headerlink" title="搜索初始解"></a>搜索初始解</h3><p>局部搜索在操作过程中，只能在有效解间进行搜索并优化目标函数，因此需要找到一个效果不是很好但是可行的解作为搜索的起点。由于车辆路径问题变量多、关联性强、限制条件多，因此很难直接得到一组可行解。在这里我们采用贪心法得到第一组可行解并开始搜索。</p>
 <p>搜索的过程是：每当还有顾客没有覆盖到但当前没有车辆有足够容量时，增加一辆货车，从目前没有被覆盖的需求最小的客户开始送货，直至容量不足。如此操作直至所有客户都被覆盖。这样可以保证每个客户覆盖不重不漏，并且车辆容量都足够。</p>
 <p>找到初始解之后，就可以开始进行局部搜索，直至达到最大搜索时间、最大搜索次数或者无法通过局部搜索找到更优解为止。求解代码在<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-07-vrp/" target="_blank" rel="noopener" title="VRP Solution">这里</a>。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://jixinfeng.github.io/2018/09/20/Discrete-Optimization-Note-5-Facility-Location/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jx.f">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="东罗谷乡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/09/20/Discrete-Optimization-Note-5-Facility-Location/" class="post-title-link" itemprop="url">Discrete Optimization 学习笔记（5）设施选址问题</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-20 22:43:22" itemprop="dateCreated datePublished" datetime="2018-09-20T22:43:22-04:00">2018-09-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-07 00:04:46" itemprop="dateModified" datetime="2020-01-07T00:04:46-05:00">2020-01-07</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p><a href="https://en.wikipedia.org/wiki/Facility_location_problem" target="_blank" rel="noopener" title="Facility Location Problem Wiki Page">设施选址问题</a>是一个比较具有现实意义的优化问题。问题可以通过 $N$ 个备选的供应设施位置和 $M$ 个客户来描述。选定一个候选位置建立供应设施 $f$ 的时候需要付出 $s_f$ 的建设成本，并且设施的最大供应量不能超过 $cap_f$ ；与之对应每个客户 $c$ 均有一个需求值 $d_c$ 需要被满足；设施 $f$ 和客户 $c$ 之间的距离为两者之间的欧几里得距离 $d(f, c)$ ，送货成本等于送货距离。题目要求每个客户的需求必须满足，且至多只能接收一个供应设施的送货，同时所有设施均不能超负荷运转，即供应量不应超过设施容量。优化目标是在满足所有条件的情况下求出成本最低的设施选址以及送货安排。</p>
+<h2 id="整数规划"><a href="#整数规划" class="headerlink" title="整数规划"></a>整数规划</h2><p>此题直接通过整数规划就能获得理想的结果。建立规划模型时，需要分别添加两组变量，一组用来表示是否在一个备选位置上建立设施，共 $N$ 个 0-1 变量，另一组用来表示每个客户接受的供应设施，共 $N\times M$ 个 0-1 变量。设置好变量后，将设施位置成本、容量，客户需求以及每个位置和客户之间的距离设置在限制条件中直接求解即可得到最优解，详见<a href="https://github.com/jixinfeng/discopt-soln/blob/master/week-06-facility/solver.py" target="_blank" rel="noopener" title="Facility Location Solution">完整代码</a></p>
 
       
     </div>
